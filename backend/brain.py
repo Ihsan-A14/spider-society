@@ -1,16 +1,16 @@
 import os
 import base64
 import json
+import random
 from pathlib import Path
 from typing import Dict, Any
 from openai import OpenAI
 
-# Import your config
+# Import config
 try:
-    from meme_config import meme_template_db
+    from meme_config import meme_template_db as TEMPLATE_DB
 except ImportError:
-    # Fallback for testing if config is missing
-    meme_template_db = {"drake_meme": {}} 
+    TEMPLATE_DB = {}
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -21,14 +21,10 @@ def encode_image(image_path: str) -> str:
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
-def generate_meme_roast(
-    image_path: str,
-    roast_level: str = "medium",
-    max_tokens: int = 3000
-) -> Dict[str, Any]:
+def generate_meme_roast(image_path: str, roast_level: str = "medium", max_tokens: int = 3000) -> Dict[str, Any]:
     
-    # 1. Get available memes dynamically from your config
-    available_memes = list(meme_template_db.keys())
+    # 1. Setup available memes
+    available_memes = list(TEMPLATE_DB.keys())
     memes_list_str = ", ".join(available_memes)
 
     # 2. Encode Image
@@ -37,49 +33,45 @@ def generate_meme_roast(
     except FileNotFoundError as e:
         return {"error": str(e)}
 
-    print(f"🧠 AI Analyzing vibe... (Level: {roast_level} | Memes: {len(available_memes)})")
+    print(f"🧠 AI Analyzing vibe... (Level: {roast_level})")
 
-    # 3. Define the CS Persona
-    # This dictionary controls the "heat" of the roast
+    # 3. Define Persona
     instructions = {
-        "mild": "You are a helpful TA. Tease them gently about simple errors (syntax, missing semicolons).",
-        "medium": "You are a tired Senior Dev. Be sarcastic about their code quality, spaghetti logic, and bad git habits.",
-        "savage": "You are a ruthless StackOverflow moderator. Destroy their ego. Mock their existence. Focus on unemployment, AI replacing them, and their bad 'vibe'."
+        "mild": "You are a playful TA. Tease them about simple syntax errors.",
+        "medium": "You are a tired Senior Dev. Be sarcastic about their spaghetti code.",
+        "savage": "You are a toxic Tech Lead. Destroy their ego. Mock their unemployment."
     }
     persona = instructions.get(roast_level.lower(), instructions["medium"])
 
+    # 4. THE CORE DIRECTIVE (Your Requested Prompt)
     system_prompt = (
-        f"{persona}\n"
-        "TASK: Analyze the user's selfie and generate a roast meme.\n"
-        "THEME: Computer Science, Coding, CS Majors, CS Unemployment, Hackathons, Tech Life.\n\n"
+        f"{persona}\n\n"
+        "Turn this image into a brutally savage meme roasting a CS student.\n"
+        "Theme: jobless, homeless, unemployed coder, broke student energy.\n"
+        "Use dark humor, tech jokes, and brutal sarcasm.\n"
+        "Keep captions short, lethal, and viral.\n\n"
         f"AVAILABLE TEMPLATES: [{memes_list_str}]\n"
-        "1. Select the BEST template from the list that fits the user's vibe.\n"
-        "   - 'drake_meme': Good for Rejection/Acceptance.\n"
-        "   - 'panda_suit': Good for 'Trashy Reality' vs 'Professional Lie'.\n"
-        "   - 'dicaprio_laugh': Good for condescending mockery.\n"
-        "2. OUTPUT strict JSON:\n"
-        "   {\n"
-        "     'template': 'one_of_the_keys_above',\n"
-        "     'top_text': 'Text for the top box',\n"
-        "     'bot_text': 'Text for the bottom box'\n"
-        "   }\n"
-        "Constraint: Keep text under 12 words."
+        "RULES FOR JSON OUTPUT:\n"
+        "1. 'drake_meme' / 'panda_suit': Return JSON with keys 'top_text' and 'bot_text'.\n"
+        "2. 'dicaprio_laugh': Return JSON with 'top_text' (setup) and 'bot_text' (punchline).\n"
+        "3. 'clown_makeup': Return JSON with 'text_1', 'text_2', 'text_3', 'text_4'.\n"
+        "   - Step 1: Normal thought (e.g. 'I will apply to FAANG')\n"
+        "   - Step 2: Optimistic mistake (e.g. 'I will learn Rust in a weekend')\n"
+        "   - Step 3: Delusion (e.g. 'Who needs a degree?')\n"
+        "   - Step 4: Full Clown (e.g. 'Unpaid internship at 30')\n\n"
+        "JSON ONLY. NO EXPLANATION."
     )
 
-    # 4. Call GPT-5-Mini
     try:
         response = client.chat.completions.create(
-            model="gpt-5-mini",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {
                     "role": "user", 
                     "content": [
-                        {"type": "text", "text": f"Roast this CS major. Level: {roast_level}."},
-                        {
-                            "type": "image_url", 
-                            "image_url": {"url": f"data:image/jpeg;base64,{base64_image}", "detail": "low"}
-                        }
+                        {"type": "text", "text": f"Roast this person. Level: {roast_level}."},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                     ]
                 }
             ],
@@ -90,16 +82,15 @@ def generate_meme_roast(
         content = response.choices[0].message.content
         result = json.loads(content)
         
-        # Verify the AI chose a valid template
-        if result.get("template") not in meme_template_db:
-            print(f"⚠️ AI chose invalid template '{result.get('template')}'. Defaulting to drake_meme.")
-            result["template"] = "drake_meme"
+        # Validation: If AI picks a fake template, force a random real one
+        if result.get("template") not in TEMPLATE_DB:
+            result["template"] = random.choice(available_memes)
             
         return result
 
     except Exception as e:
         return {"error": f"Brain Freeze: {str(e)}"}
 
-# Wrapper for backward compatibility
+# Wrapper
 def get_roast(image_path, roast_level="medium"):
     return generate_meme_roast(image_path, roast_level)

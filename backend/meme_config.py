@@ -16,8 +16,17 @@ meme_template_db = {
 
     "panda_suit": 
     {
-        "filename": "components/panda_suit.png", # Ensure you have this file!
+        "filename": "components/panda_suit.png", #
         "top_text": {"pos": (565, 15), "box_size": (720, 435), "color": "black", "font_size": 50, "align": "center"},
         "bot_text": {"pos": (565, 490), "box_size": (720, 432), "color": "black", "font_size": 50, "align": "center"}
+    },
+
+    "clown_makeup": 
+    {
+        "filename": "components/clown.png",
+        "text_1": {"pos": (15, 13), "box_size": (585, 217), "color": "black", "font_size": 40, "align": "center"},
+        "text_2": {"pos": (18, 270), "box_size": (552, 233), "color": "black", "font_size": 40, "align": "center"},
+        "text_3": {"pos": (19, 552), "box_size": (518, 217), "color": "black", "font_size": 40, "align": "center"},
+        "text_4": {"pos": (23, 809), "box_size": (538, 215), "color": "black", "font_size": 40, "align": "center"}
     },
     }
