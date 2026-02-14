@@ -209,3 +209,96 @@ body::before{
   opacity:.22;
   filter: drop-shadow(0 10px 18px rgba(0,0,0,.18));
 }
+
+/* stage layout */
+.stageCard{ padding: 18px; }
+
+.stageGrid{
+  display:grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 16px;
+}
+@media (max-width: 900px){
+  .stageGrid{ grid-template-columns: 1fr; }
+}
+
+.panel{
+  background: rgba(255,255,255,.75);
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.panelHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.panelTitle{
+  font-family: "Bebas Neue";
+  font-size: 34px;
+  letter-spacing: .02em;
+  line-height: .9;
+}
+.panelSub{
+  font-size: 12px;
+  color: rgba(0,0,0,.55);
+  text-align:right;
+}
+
+.controlsOneCol{ grid-template-columns: 1fr; }
+
+.actionsSpread{
+  justify-content: space-between;
+  align-items:center;
+}
+.actionsSpread .primary{ flex: 1; }
+.actionsSpread .ghost{ min-width: 96px; }
+
+.twoUp{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 700px){
+  .twoUp{ grid-template-columns: 1fr; }
+}
+
+.box{
+  background: rgba(255,255,255,.65);
+  border: 1px dashed rgba(0,0,0,.14);
+  border-radius: 16px;
+  padding: 10px;
+  min-height: 220px;
+}
+.boxLabel{
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .75;
+  margin-bottom: 8px;
+}
+.boxTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom: 8px;
+}
+
+.empty{
+  color: rgba(0,0,0,.55);
+  font-size: 13px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(0,0,0,.03);
+}
+
+.box img{
+  width:100%;
+  display:none;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.08);
+}
