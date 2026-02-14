@@ -91,12 +91,18 @@ function resetUI() {
   fileInput.value = "";
   fileNameEl.textContent = "No file selected";
 
+  // preview
+  previewImg.style.display = "none";
   previewImg.removeAttribute("src");
   previewEmpty.style.display = "block";
+  previewEmpty.style.visibility = "visible";
+  previewEmpty.style.opacity = "1";
 
+  // result
   resultImg.removeAttribute("src");
   resultEmpty.style.display = "block";
 
+  // download
   downloadA.style.display = "none";
   downloadA.removeAttribute("href");
 
@@ -104,7 +110,27 @@ function resetUI() {
   resetBtn.disabled = true;
 
   setStatus("");
-  
+
+
+
+  // --- ONE set of listeners for opening file picker ---
+
+pickBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  fileInput.click();
+});
+
+fileInput?.addEventListener("click", (e) => {
+  e.stopPropagation();
+});
+
+drop?.addEventListener("click", (e) => {
+  // Only trigger if user clicked the drop area itself (not button/input)
+  if (e.target.closest("button") || e.target === fileInput) return;
+  fileInput.click();
+});
+
   previewImg.style.display = "none";
   previewImg.removeAttribute("src");
 
@@ -114,15 +140,6 @@ function resetUI() {
 
 }
 
-// Click “Choose image” opens file picker
-pickBtn?.addEventListener("click", () => fileInput.click());
-
-// Clicking the whole drop area also opens file picker
-drop?.addEventListener("click", (e) => {
-  // avoid double-trigger if clicking the actual input/button area
-  if (e.target === fileInput) return;
-  fileInput.click();
-});
 
 // When user selects a file
 fileInput?.addEventListener("change", () => {

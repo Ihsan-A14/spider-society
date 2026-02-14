@@ -382,11 +382,11 @@ body::after{
   border: 1px solid rgba(0,0,0,.08);
 }
 
-#preview, #result {
+#preview,#result {
   width: 100%;
   height: 100%;
+  object-fit: contain;  /* ⭐️ this is the key */
   display: block;
-  object-fit: cover;
 }
 
 
