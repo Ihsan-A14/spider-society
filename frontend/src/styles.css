@@ -514,3 +514,14 @@ select{
   object-fit: cover;
 }
 
+/* RESULT: stack preview + meme vertically (less congested) */
+.twoUp{
+  grid-template-columns: 1fr;   /* was 1fr 1fr */
+  gap: 16px;                    /* a bit more breathing room */
+}
+
+/* optional: make each box a touch shorter since they stack now */
+.twoUp .box{
+  min-height: 300px;            /* was 360px */
+}
+
