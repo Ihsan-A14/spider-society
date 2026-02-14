@@ -15,7 +15,6 @@ except ImportError:
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def encode_image(image_path: str) -> str:
-    """Encodes a local image to base64 for the API."""
     path = Path(image_path).expanduser().resolve()
     if not path.is_file():
         raise FileNotFoundError(f"Image not found: {path}")
@@ -28,73 +27,63 @@ def generate_meme_roast(
     max_tokens: int = 3000
 ) -> Dict[str, Any]:
     
-    # 1. Get available memes
+    # 1. SELECT TEMPLATE
     available_memes = list(TEMPLATE_DB.keys())
-    memes_list_str = ", ".join(available_memes)
+    if not available_memes:
+        return {"error": "No templates found in config."}
+    
+    selected_template = random.choice(available_memes)
+    print(f"🎲 Template: {selected_template}")
 
-    # 2. Encode Image
-    try:
-        base64_image = encode_image(image_path)
-    except FileNotFoundError as e:
-        return {"error": str(e)}
+    # 2. DEFINE TECHNICAL OVERRIDES
+    # Your text asks for "Only 2 captions", but some memes need 4 or 5.
+    # We append this logic at the end to ensure the code doesn't break.
+    technical_override = ""
+    
+    if selected_template == "brain_explode":
+        technical_override = (
+            f"\n\n--- ⚠️ TEMPLATE OVERRIDE: {selected_template} ---\n"
+            "Ignore the '2 captions' limit above. This is a 4-PANEL meme.\n"
+            "You MUST return 4 keys: 'text_1', 'text_2', 'text_3', 'text_4'.\n"
+            "Logic: Smart -> Complicated -> Stupid -> Galaxy Brain."
+        )
+    elif selected_template == "clown_makeup":
+        technical_override = (
+            f"\n\n--- ⚠️ TEMPLATE OVERRIDE: {selected_template} ---\n"
+            "Ignore the '2 captions' limit above. This is a 4-PANEL meme.\n"
+            "You MUST return 4 keys: 'text_1', 'text_2', 'text_3', 'text_4'.\n"
+            "Logic: Confidence -> Doubt -> Mistake -> Full Clown."
+        )
+    elif selected_template == "ballon_scared":
+        technical_override = (
+            f"\n\n--- ⚠️ TEMPLATE OVERRIDE: {selected_template} ---\n"
+            "Ignore the '2 captions' limit above. This is a 5-TEXT meme.\n"
+            "You MUST return 5 keys: 'text_5' (The Monster), 'text_1', 'text_2', 'text_3', 'text_4' (The Victim)."
+        )
+    else:
+        technical_override = (
+            f"\n\n--- TEMPLATE INFO: {selected_template} ---\n"
+            "Adhere to the 2-caption rule above.\n"
+            "Return keys: 'top_text' and 'bot_text'."
+        )
 
-    print(f"🧠 DevRoast Analyzing... (Level: {roast_level})")
+    # 3. YOUR EXACT SYSTEM PROMPT
+    # We paste your text exactly as requested.
+    user_persona_text = (
+        "You are a savage, chaotic Gen Z meme creator who makes bold, embarrassing, viral roast captions."
+        "\n\nYour job is to roast and stereotype the person in the image in a funny, exaggerated, meme-style way. The goal is to judge their appearance, facial expression, and clothing FIRST, then connect that to a relatable computer science stereotype.\n\nThe humor should feel like:\n\n• Group chat roasting\n• TikTok comments\n• Twitter threads\n• Internet meme chaos\n\nThe tone must be confident, judgmental, and savage.\n\n---\n\nCRITICAL RULE (MOST IMPORTANT)\n\nYou MUST ALWAYS comment on the person’s appearance.\n\nThis is NOT optional.\n\nEvery caption MUST include at least ONE of the following:\n\n• Facial expression\n• Clothing or fashion\n• Body language or pose\n• Overall vibe or energy\n\nIf you do not comment on the person’s appearance, your response is wrong.\n\nNever skip this.\n\n---\n\nMANDATORY STRUCTURE\n\nStep 1: Judge the person’s appearance first.\nStep 2: Make a bold assumption about their personality or habits.\nStep 3: Connect it to a simple computer science stereotype.\n\nAll captions must follow this structure.\n\n---\n\nWHAT TO NOTICE ABOUT THE PERSON\n\nFocus on:\n\n• Confused, tired, smug, awkward, or overconfident expressions\n• Weird, outdated, or trying-too-hard fashion\n• Lazy or chaotic body language\n• Clueless or stressed vibe\n• Fake confidence or fake intelligence\n• Low effort or messy energy\n\nMake very strong assumptions based on how they look.\n\n---\n\nCOMPUTER SCIENCE STEREOTYPES (SIMPLE ONLY)\n\nAlways connect the roast to relatable CS stereotypes such as:\n\n• Copying from Stack Overflow\n• Watching tutorials but never coding\n• Fake productivity\n• Coffee addiction\n• Debugging all night\n• Gaming instead of studying\n• Broken sleep schedule\n• Using ChatGPT for everything\n• \"It works on my machine\"\n• Last-minute cramming\n• Never touching grass\n\nDo NOT use advanced or niche tech topics.\n\n---\n\nROAST LEVELS\n\nHigh\nSavage and embarrassing.\n\nVery High\nMore humiliating and exaggerated.\n\nUnhinged\nMaximum chaos and wild assumptions.\n\nNever ever ever be soft.\n\n---\n\nBEHAVIOR RULES\n\n• No polite or neutral descriptions.\n• No explaining the joke.\n• No long sentences.\n• No formal language.\n• No emojis.\n• Be bold and confident.\n• Make strong assumptions.\n\n---\n\nIF NO PERSON IS VISIBLE\n\nIf the image does not clearly show a person, create a funny assumption about the person behind the image and still connect it to a tech stereotype.\n\nExample:\nBro took this picture after breaking production.\n\nNever say there is no person. Always assume someone is behind it.\n\n---\n\nOUTPUT FORMAT (STRICT)\n\nReturn ONLY 2 captions.\n\nEach caption must:\n\n• Be under 10 words\n• Be on separate lines\n• Match the selected meme format\n• Reflect the selected roast level\n• No numbering\n• No extra text\n• No explanation"
+    )
 
-    # 3. THE DEVROAST SYSTEM PROMPT
+    # Combine them (Your Text + Technical Fixes + JSON Requirement)
     system_prompt = (
-        "You are 'DevRoast,' a cynical, hilarious, and culturally aware meme generator for Computer Science students.\n"
-        "Your goal: Generate a 'savage' meme based on the user's photo.\n\n"
-        
-        "--- ANALYSIS GUIDELINES ---\n"
-        "1. CLOTHING: Suit (Desperate), Hoodie (Grinder), Smart Casual (Fake Intern).\n"
-        "2. EXPRESSION: Smile (Ignorant), Sad (Segfault), Confused (Vim).\n"
-        "3. TONE: Savage but lighthearted CS jokes.\n\n"
-
-        "--- MEME LOGIC ENGINE (CRITICAL) ---\n"
-        "You MUST follow the specific format for the chosen template:\n\n"
-        
-        "1. **brain_explode** (4 panels): PROGRESSION of Intelligence/Stupidity.\n"
-        "   - text_1: The normal/correct way (e.g. 'Using Python loops')\n"
-        "   - text_2: The complex way (e.g. 'Using List Comprehensions')\n"
-        "   - text_3: The bad way (e.g. 'Recursion with no exit condition')\n"
-        "   - text_4: The ABSURD way (e.g. 'Hardcoding 1000 print statements')\n\n"
-        
-        "2. **clown_makeup** (4 panels): PROGRESSION of Delusion.\n"
-        "   - text_1: Normal thought (e.g. 'I'll finish this side project')\n"
-        "   - text_2: Optimistic mistake (e.g. 'I don't need Git, I'll be careful')\n"
-        "   - text_3: Delusion (e.g. 'I can write my own database')\n"
-        "   - text_4: Full Clown (e.g. 'Lost all data, no backups')\n\n"
-        
-        "3. **ballon_scared** (5 texts): The CHASE.\n"
-        "   - text_5: The Monster/Threat (e.g. 'The Senior Dev', 'Segfault')\n"
-        "   - text_1, text_2, text_3, text_4: The Victim running away (e.g. 'Me', 'My Code', 'My Career', 'My Sanity')\n\n"
-        
-        "4. **drake_meme** / **panda_suit** (2 panels): REJECTION vs ACCEPTANCE.\n"
-        "   - top_text: The 'Good' practice that you reject (e.g. 'Writing Unit Tests')\n"
-        "   - bot_text: The 'Bad' habit you actually do (e.g. 'Testing in Production')\n\n"
-
-        "5. **dicaprio_laugh** (2 texts): MOCKERY.\n"
-        "   - top_text: The Setup (e.g. 'He thinks HTML is a programming language')\n"
-        "   - bot_text: The Punchline (e.g. 'Wait until he sees CSS')\n\n"
-
-        "--- OUTPUT FORMAT (STRICT JSON) ---\n"
-        f"Choose the BEST template from: [{memes_list_str}].\n"
-        "Output strictly valid JSON:\n"
-        "{\n"
-        "  'visual_roast': 'Savage comment on their look',\n"
-        "  'template': 'template_key',\n"
-        "  'text_1': '...',\n"
-        "  'text_2': '...',\n"
-        "  'text_3': '...',\n"
-        "  'text_4': '...',\n"
-        "  'text_5': '...',\n"
-        "  'top_text': '...',\n"
-        "  'bot_text': '...'\n"
-        "}\n"
-        "Use ONLY the keys relevant to the chosen template."
+        f"{user_persona_text}"
+        f"{technical_override}"
+        "\n\nFINALLY: Return valid JSON only. Key 'visual_roast' is optional but good for logging."
     )
 
     try:
+        base64_image = encode_image(image_path)
+        
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -102,7 +91,7 @@ def generate_meme_roast(
                 {
                     "role": "user", 
                     "content": [
-                        {"type": "text", "text": "Analyze this dev. JSON only."},
+                        {"type": "text", "text": "Roast this photo based on visuals. JSON only."},
                         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                     ]
                 }
@@ -114,46 +103,34 @@ def generate_meme_roast(
         content = response.choices[0].message.content
         result = json.loads(content)
         
-        # --- DATA SANITIZATION ---
+        # --- SANITIZATION ---
         result["user_image_path"] = image_path
         
+        # Force correct template
+        if result.get("template") not in TEMPLATE_DB:
+             result["template"] = selected_template
+
         if "visual_roast" in result:
             print(f"🔥 VISUAL ROAST: {result['visual_roast']}")
 
-        if result.get("template") not in TEMPLATE_DB:
-            print(f"⚠️ Invalid template '{result.get('template')}'. Defaulting to drake_meme.")
-            result["template"] = "drake_meme"
-
-        template = result["template"]
-        
-        # FIX MISSING KEYS / FORMATTING
-        if template == "brain_explode":
+        # KEY MAPPING (To ensure builder compatibility)
+        if selected_template in ["clown_makeup", "brain_explode"]:
             if "text_1" not in result:
-                result["text_1"] = "Writing Code"
-                result["text_2"] = "StackOverflow"
-                result["text_3"] = "ChatGPT"
-                result["text_4"] = "Random Guessing"
-
-        elif template == "clown_makeup":
-             if "text_1" not in result:
-                # Map standard top/bot if AI failed
-                result["text_1"] = result.get("top_text", "Using a Library")
-                result["text_2"] = result.get("bot_text", "Writing it yourself")
-                result["text_3"] = "Writing it in Assembly"
-                result["text_4"] = "Coding on a whiteboard"
-        
-        elif template == "ballon_scared":
+                result["text_1"] = result.get("top_text", "Look 1")
+                result["text_2"] = result.get("bot_text", "Look 2")
+                result["text_3"] = "Look 3"
+                result["text_4"] = "Look 4"
+        elif selected_template == "ballon_scared":
              if "text_5" not in result:
                 result["text_1"] = "Me"
-                result["text_2"] = "Code"
-                result["text_3"] = "Bugs"
-                result["text_4"] = "Deadline"
-                result["text_5"] = "The P1 Ticket"
-
-        else: # Standard 2-panel memes
+                result["text_2"] = "My Dignity"
+                result["text_3"] = "My Style"
+                result["text_4"] = "My Future"
+                result["text_5"] = "This Photo"
+        else: 
             if "top_text" not in result:
-                result["top_text"] = result.get("text_1", "404 Text Not Found")
-                result["bot_text"] = result.get("text_2", "Try again")
+                result["top_text"] = result.get("text_1", "Expectation")
+                result["bot_text"] = result.get("text_2", "Reality")
 
         return result
 
