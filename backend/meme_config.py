@@ -40,5 +40,15 @@ meme_template_db = {
         "text_2": {"pos": (20, 320), "box_size": (350, 275), "color": "black", "font_size": 40, "align": "center"},
         "text_3": {"pos": (22, 632), "box_size": (366, 203), "color": "black", "font_size": 40, "align": "center"},
         "text_4": {"pos": (27, 907), "box_size": (346, 219), "color": "black", "font_size": 40, "align": "center"}
-    }
+    },
+
+    'woman_cat':{
+        'filename': 'components/woman_cat.png',
+        'top_text': {"pos": (11, 14), "box_size": (744, 181), "align": "center", "color": "black", "font_size": 60},
+        'bot_text': {"pos": (808, 17), "box_size": (712, 175), "align": "center", "color": "black", "font_size": 60}
+    },
+
+    
+
+    
 }

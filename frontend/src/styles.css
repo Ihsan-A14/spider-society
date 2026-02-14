@@ -10,53 +10,50 @@
   --radius: 22px;
 }
 
-*{box-sizing:border-box}
+*{ box-sizing:border-box; }
 
-html{
-  background: var(--paper);
-}
+html{ background: var(--paper); }
 
 body{
   margin:0;
-  background: transparent; /* IMPORTANT */
+  background: transparent;
   color: var(--ink);
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
   overflow-x:hidden;
 }
 
-
-/* FLUID LAYER (VISIBLE) */
+/* FLUID LAYER */
 body::before{
   content:"";
   position: fixed;
   inset: -30%;
-  pointer-events: none;
-  z-index: 0;
+  pointer-events:none;
+  z-index:0;
 
- background:
-  radial-gradient(650px 520px at 70% 18%, rgba(246,178,26,.75), rgba(255,204,77,.4), transparent 66%),
-  radial-gradient(520px 420px at 25% 70%, rgba(246,178,26,.45), transparent 70%),
-  radial-gradient(400px 300px at 50% 50%, rgba(255,204,77,.25), transparent 70%);
+  background:
+    radial-gradient(650px 520px at 70% 18%, rgba(246,178,26,.75), rgba(255,204,77,.4), transparent 66%),
+    radial-gradient(520px 420px at 25% 70%, rgba(246,178,26,.45), transparent 70%),
+    radial-gradient(400px 300px at 50% 50%, rgba(255,204,77,.25), transparent 70%);
 
   filter: blur(22px) saturate(1.2);
-  opacity: 1;
+  opacity:1;
 
   border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%;
   animation: mangoFluid 4s ease-in-out infinite alternate;
   transform: translate3d(0,0,0);
 }
 
-/* GRAIN LAYER (ABOVE FLUID) */
+/* GRAIN LAYER */
 body::after{
   content:"";
   position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
 
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
-  opacity: .10;
-  mix-blend-mode: multiply;
+  opacity:.10;
+  mix-blend-mode:multiply;
 }
 
 @keyframes mangoFluid{
@@ -89,19 +86,19 @@ body::after{
 
 .wrap{
   position: relative;
-  z-index: 1; /* IMPORTANT: puts content above fluid/grain */
+  z-index: 1;
   max-width:1100px;
   margin:0 auto;
   padding:26px 18px 60px;
 }
 
-
-/* hero with wavy cut bottom */
+/* HERO */
 .hero{
   position:relative;
   padding: 18px 0 26px;
   margin-bottom: 18px;
 }
+
 .hero::after{
   content:"";
   position:absolute;
@@ -118,13 +115,15 @@ body::after{
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  margin-bottom: 16px;
+  margin-bottom:16px;
 }
+
 .brand{
   font-weight:900;
   letter-spacing:.18em;
   font-size:12px;
 }
+
 .pill{
   font-size:12px;
   padding:8px 12px;
@@ -134,46 +133,46 @@ body::after{
   box-shadow: 0 10px 25px rgba(0,0,0,.06);
 }
 
-.heroTitle{
-  margin:0;
-  line-height:.92;
-}
+.heroTitle{ margin:0; line-height:.92; }
+
 .titleCaps{
   display:block;
   font-family: "Bebas Neue", system-ui;
   font-size: clamp(44px, 7vw, 76px);
   letter-spacing: .02em;
 }
+
 .heroScript{
   font-family:"Permanent Marker", system-ui;
   font-size: clamp(18px, 2.1vw, 26px);
   margin-top: 8px;
-  color: #1d1d1d;
+  color:#1d1d1d;
   transform: rotate(-1deg);
 }
 
-/* IMAGE-FILL TEXT (like your inspo) */
+/* TEXTURE TEXT */
 .textImage{
-  background-image: url("./assets/food-texture.jpg"); /* add any image here */
-  background-size: cover;
-  background-position: center;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: none;
-}
-.textImageSmall{
-  background-image: url("./assets/gradient-texture.jpg"); /* another texture */
+  background-image: url("./assets/food-texture.jpg");
   background-size: cover;
   background-position: center;
   -webkit-background-clip:text;
   background-clip:text;
-  color: transparent;
+  color:transparent;
+  text-shadow:none;
 }
 
-/* main stage card: more collage-like */
-.stage .card,
-.card{
+.textImageSmall{
+  background-image: url("./assets/gradient-texture.jpg");
+  background-size: cover;
+  background-position: center;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+/* CARDS */
+.card,
+.stage .card{
   background: var(--card);
   border: 1px solid rgba(0,0,0,.10);
   border-radius: var(--radius);
@@ -181,11 +180,11 @@ body::after{
   backdrop-filter: blur(8px);
 }
 
-/* add a “sticker” corner to the card */
 .card{
   position:relative;
   overflow:hidden;
 }
+
 .card::before{
   content:"";
   position:absolute;
@@ -197,12 +196,12 @@ body::after{
   filter: blur(.2px);
 }
 
-/* features section */
+/* FEATURES */
 .features{
   display:grid;
   grid-template-columns: 1fr 1fr;
   gap:16px;
-  margin-top: 18px;
+  margin-top:18px;
 }
 @media (max-width:900px){
   .features{ grid-template-columns: 1fr; }
@@ -217,6 +216,7 @@ body::after{
   position:relative;
   overflow:hidden;
 }
+
 .featureCard::after{
   content:"";
   position:absolute; left:-20px; right:-20px; bottom:-10px;
@@ -225,10 +225,11 @@ body::after{
   clip-path: polygon(0 55%, 12% 80%, 25% 52%, 38% 76%, 52% 54%, 66% 78%, 78% 56%, 90% 76%, 100% 60%, 100% 100%, 0 100%);
   opacity:.85;
 }
+
 .featureCaps{
   font-family:"Bebas Neue";
   color:#101114;
-  font-size: 44px;
+  font-size:44px;
   letter-spacing:.02em;
   line-height:.9;
 }
@@ -236,27 +237,29 @@ body::after{
 .featureCaps2{
   font-family:"Permanent Marker";
   color:#101114;
-  font-size: 35px;
+  font-size:35px;
   letter-spacing:.02em;
   line-height:.9;
 }
 
 .featureScript{
   font-family:"Permanent Marker";
-  font-size: 18px;
-  margin-top: 10px;
+  font-size:18px;
+  margin-top:10px;
   transform: rotate(-1deg);
 }
 
-/* keep your original grid */
+/* LAYOUT GRID */
 .grid{
   display:grid;
   grid-template-columns:1fr 1.2fr;
   gap:18px;
 }
-@media (max-width:900px){ .grid{grid-template-columns:1fr} }
+@media (max-width:900px){
+  .grid{ grid-template-columns:1fr; }
+}
 
-/* scroll reveal base */
+/* SCROLL REVEAL */
 .reveal{
   opacity:0;
   transform: translateY(18px);
@@ -267,42 +270,38 @@ body::after{
   transform: translateY(0);
 }
 
-/* small parallax “paper pieces” */
+/* DECOR */
 .parallaxPiece{
   position:absolute;
   width:220px; height:80px;
-  border-radius: 18px;
+  border-radius:18px;
   background: rgba(0,0,0,.06);
   z-index:-1;
   filter: blur(.2px);
 }
 
-/* optional: tone down your emoji particles so they match paper style */
 .particle{
   opacity:.22;
   filter: drop-shadow(0 10px 18px rgba(0,0,0,.18));
 }
 
-/* stage layout */
-.stageCard{ padding: 18px; }
+/* STAGE */
+.stageCard{ padding:18px; }
 
 .stageGrid{
   display:grid;
-  grid-template-columns: 1fr 1fr; /* equal columns */
+  grid-template-columns: 1fr 1fr;
   align-items: stretch;
 }
-
-
-@media (max-width: 900px){
-  .stageGrid{ grid-template-columns: 1fr; }
+@media (max-width:900px){
+  .stageGrid{ grid-template-columns:1fr; }
 }
 
 .panel{
   background: rgba(255,255,255,.75);
   border: 1px solid rgba(0,0,0,.10);
-  border-radius: 18px;
-  padding: 14px;
-  box-sizing: border-box;
+  border-radius:18px;
+  padding:14px;
 }
 
 .panel.loaded{
@@ -313,17 +312,19 @@ body::after{
   display:flex;
   justify-content:space-between;
   align-items:flex-end;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap:12px;
+  margin-bottom:10px;
 }
+
 .panelTitle{
   font-family: "Bebas Neue";
-  font-size: 34px;
-  letter-spacing: .02em;
-  line-height: .9;
+  font-size:34px;
+  letter-spacing:.02em;
+  line-height:.9;
 }
+
 .panelSub{
-  font-size: 12px;
+  font-size:12px;
   color: rgba(0,0,0,.55);
   text-align:right;
 }
@@ -334,82 +335,90 @@ body::after{
   justify-content: space-between;
   align-items:center;
 }
-.actionsSpread .primary{ flex: 1; }
-.actionsSpread .ghost{ min-width: 96px; }
+.actionsSpread .primary{ flex:1; }
+.actionsSpread .ghost{ min-width:96px; }
 
+/* RESULT STACK (one column) */
 .twoUp{
   display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap:16px;
 }
-@media (max-width: 700px){
+@media (max-width:700px){
   .twoUp{ grid-template-columns: 1fr; }
 }
 
+/* FRAME BOX (IMPORTANT FIX) */
 .box{
-  background: rgba(255,255,255,.65);
+  background: rgba(255,255,255,.72);
   border: 1px dashed rgba(0,0,0,.14);
-  border-radius: 16px;
-  padding: 10px;
-  min-height: 220px;
+  border-radius:16px;
+  padding:10px;
+  min-height:300px;
+
+  overflow:hidden;
+
+  /* ⭐ change this */
+  display:flex;
+  flex-direction: column; /* IMPORTANT */
 }
-.boxLabel{
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  opacity: .75;
-  margin-bottom: 8px;
-}
+
+
 .boxTop{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom: 8px;
+  margin-bottom:10px;
+}
+
+.boxLabel{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  opacity:.75;
 }
 
 .empty{
   color: rgba(0,0,0,.55);
-  font-size: 13px;
-  padding: 14px;
-  border-radius: 14px;
+  font-size:13px;
+  padding:14px;
+  border-radius:14px;
   background: rgba(0,0,0,.03);
 }
 
-.box img{
+/* UNIFIED MEDIA CONTAINMENT (applies to preview/result images AND canvas) */
+.box img,
+.box canvas,
+#preview,
+#result{
   width:100%;
-  display:none;
-  border-radius: 14px;
-  border: 1px solid rgba(0,0,0,.08);
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+  object-fit: contain;
+  display:block;
 }
 
-#preview {
-  width: 100%;
-  height: 92%;
-  object-fit: contain;  /* ⭐️ this is the key */
-  display: block;
-}
+/* If #result is hidden until generated */
+#result{ display:none; }
 
-#result {
-  display: none;
-}
-
-
-/* Hide native file input UI (kills "Choose File / No file chosen") */
+/* FILE INPUT HIDE */
 #file{
   position:absolute;
-  width:1px; height:1px;
+  width:1px;
+  height:1px;
   opacity:0;
   pointer-events:none;
 }
 
-/* Dropzone */
+/* DROPZONE */
 .drop{
   position:relative;
   border: 2px dashed rgba(0,0,0,.14);
-  border-radius: 20px;
-  padding: 18px;
-  min-height: 170px;
+  border-radius:20px;
+  padding:18px;
+  min-height:170px;
   background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.62));
   display:flex;
   align-items:center;
@@ -425,7 +434,7 @@ body::after{
 }
 
 .drop:focus{
-  outline: none;
+  outline:none;
   border-color: rgba(246,178,26,.95);
   box-shadow: 0 0 0 4px rgba(246,178,26,.18), 0 16px 40px rgba(0,0,0,.08);
 }
@@ -436,45 +445,47 @@ body::after{
   transform: scale(1.01);
 }
 
-.dropInner{ text-align:center; width:100%; max-width: 420px; }
-.dropIcon{ font-size: 40px; margin-bottom: 6px; filter: drop-shadow(0 10px 18px rgba(0,0,0,.12)); }
+.dropInner{ text-align:center; width:100%; max-width:420px; }
+.dropIcon{ font-size:40px; margin-bottom:6px; filter: drop-shadow(0 10px 18px rgba(0,0,0,.12)); }
+
 .drop .title{
   font-family:"Bebas Neue";
-  font-size: 34px;
-  letter-spacing: .03em;
-  line-height: .95;
+  font-size:34px;
+  letter-spacing:.03em;
+  line-height:.95;
 }
+
 .drop .hint{
-  margin-top: 6px;
-  font-size: 13px;
-  opacity: .7;
+  margin-top:6px;
+  font-size:13px;
+  opacity:.7;
 }
 
 .metaRow{
-  margin-top: 12px;
+  margin-top:12px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 14px;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:14px;
   background: rgba(0,0,0,.03);
   border: 1px solid rgba(0,0,0,.06);
 }
 
 .fileName{
-  font-size: 12px;
+  font-size:12px;
   opacity:.75;
-  white-space: nowrap;
+  white-space:nowrap;
   overflow:hidden;
-  text-overflow: ellipsis;
+  text-overflow:ellipsis;
 }
 
-/* Make selects + buttons match your vibe */
+/* FORM CONTROLS */
 select{
   width:100%;
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding:10px 12px;
+  border-radius:12px;
   border: 1px solid rgba(0,0,0,.12);
   background: rgba(255,255,255,.85);
   font: inherit;
@@ -482,46 +493,39 @@ select{
 
 .primary{
   background: linear-gradient(90deg, var(--mango), var(--mango2));
-  border: 0;
-  padding: 11px 14px;
-  border-radius: 14px;
-  font-weight: 800;
+  border:0;
+  padding:11px 14px;
+  border-radius:14px;
+  font-weight:800;
   cursor:pointer;
   box-shadow: 0 14px 30px rgba(246,178,26,.18);
   transition: transform .15s ease, box-shadow .15s ease;
 }
-.primary:hover{ transform: translateY(-1px); box-shadow: 0 18px 40px rgba(246,178,26,.24); }
-.primary:disabled{ opacity:.5; cursor:not-allowed; box-shadow:none; }
 
-.secondary, .ghost{
-  border-radius: 12px;
-  padding: 9px 12px;
+.primary:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 18px 40px rgba(246,178,26,.24);
+}
+
+.primary:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+.secondary,
+.ghost{
+  border-radius:12px;
+  padding:9px 12px;
   border: 1px solid rgba(0,0,0,.12);
-  background: #fff;
+  background:#fff;
   cursor:pointer;
 }
 
-/* Result boxes: feel more like “frames” */
-.box{
-  min-height: 360px;
-  background: rgba(255,255,255,.72);
-  border: 1px dashed rgba(0,0,0,.14);
+.mediaWrap{
+  flex: 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
 }
-
-.box img{
-  width:100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-}
-
-/* RESULT: stack preview + meme vertically (less congested) */
-.twoUp{
-  grid-template-columns: 1fr;   /* was 1fr 1fr */
-  gap: 16px;                    /* a bit more breathing room */
-}
-
-/* optional: make each box a touch shorter since they stack now */
-.twoUp .box{
-  min-height: 300px;            /* was 360px */
-}
-
