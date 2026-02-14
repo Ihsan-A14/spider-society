@@ -1,17 +1,29 @@
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
-from meme_config import meme_template_db
+
+# 👇 CORRECT IMPORT NAME
+from meme_config import meme_template_db 
 
 def draw_centered_text(draw, text, config, font):
     """
     Helper function to wrap text and center it in the box.
     """
+    # 1. SAFETY CHECK
+    if config['color'] is None or config['color'] == "transparent":
+        return
+
     x, y = config['pos']
     w, h = config['box_size']
     
-    # 1. Wrap text (break long lines)
-    # Width=15 is a guess. Adjust based on font size.
-    lines = textwrap.wrap(text, width=15) 
+    # --- DYNAMIC WRAPPING MATH ---
+    # We estimate how many characters fit in one line.
+    # A standard character is roughly 0.6 times the font size in width.
+    avg_char_width = config['font_size'] * 0.6
+    max_chars_per_line = int(w / avg_char_width)
+    
+    # Wrap text based on the calculated width (e.g., Drake=15, DiCaprio=35)
+    lines = textwrap.wrap(text, width=max_chars_per_line) 
+    # -----------------------------
     
     # 2. Calculate total height
     bbox = draw.textbbox((0, 0), "A", font=font)
@@ -32,41 +44,56 @@ def draw_centered_text(draw, text, config, font):
 
 def build_meme(roast_data):
     """
-    Takes the JSON from the Brain and creates the image.
+    Constructs the meme based on the roast data and template selected.
     """
-    # 👇 LOAD THE SPECIFIC CONFIG
-    # Make sure 'drake_meme' matches the key in your meme_config.py
-    drake_config = meme_template_db['drake_meme']
+    # 1. Get the template key selected by the AI (default to drake if missing)
+    template_key = roast_data.get("template", "drake_meme") 
     
-    # 1. Load Template
+    # 2. Safety Check: Does this key exist in your DB?
+    if template_key not in meme_template_db:
+        print(f"❌ Error: Template '{template_key}' not found in meme_config.py!")
+        # Fallback logic
+        if "drake_meme" in meme_template_db:
+            print("⚠️ Switching to default 'drake_meme'...")
+            template_key = "drake_meme"
+        else:
+            return None
+            
+    # 3. Load the actual config DICTIONARY
+    # This is the critical fix: we use the key to get the dict
+    meme_config = meme_template_db[template_key]
+    
+    print(f"🎨 Using Template: {template_key}")
+
+    # 4. Load Template Image
     try:
-        # We use convert("RGBA") to handle transparency correctly
-        img = Image.open(drake_config['filename']).convert("RGBA")
+        # Use meme_config['filename'], NOT template_key['filename']
+        img = Image.open(meme_config['filename']).convert("RGBA")
     except FileNotFoundError:
-        print(f"❌ Error: Could not find {drake_config['filename']}")
+        print(f"❌ Error: Could not find image file at: {meme_config['filename']}")
         return None
         
     draw = ImageDraw.Draw(img)
     
-    # 2. Load Font
-    # Try to load a nice font, fallback to default if missing
+    # 5. Load Font
     try:
-        # Use the font size defined in your config
-        font_size = drake_config['top_text']['font_size']
+        font_size = meme_config['top_text']['font_size']
         font = ImageFont.truetype("Arial.ttf", font_size)
     except OSError:
-        print("⚠️ Warning: Arial.ttf not found. Using default font (it might be small).")
+        print("⚠️ Warning: Arial.ttf not found. Using default font.")
         font = ImageFont.load_default()
 
-    # 3. Draw Top Text ("No")
-    print(f"🎨 Drawing Top Text: {roast_data['top_text']}")
-    draw_centered_text(draw, roast_data['top_text'], drake_config['top_text'], font)
+    # 6. Draw Top Text
+    if 'top_text' in meme_config and 'top_text' in roast_data:
+        print(f"🎨 Drawing Top Text: {roast_data['top_text']}")
+        draw_centered_text(draw, roast_data['top_text'], meme_config['top_text'], font)
     
-    # 4. Draw Bottom Text ("Yes")
-    print(f"🎨 Drawing Bottom Text: {roast_data['bot_text']}")
-    draw_centered_text(draw, roast_data['bot_text'], drake_config['bot_text'], font)
+    # 7. Draw Bottom Text
+    if 'bot_text' in meme_config and 'bot_text' in roast_data:
+        print(f"🎨 Drawing Bottom Text: {roast_data['bot_text']}")
+        draw_centered_text(draw, roast_data['bot_text'], meme_config['bot_text'], font)
     
-    # 5. Save the result
+    # 8. Save the result
     output_filename = "final_meme.png"
     img.save(output_filename)
     print(f"✅ Meme Saved as {output_filename}")

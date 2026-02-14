@@ -2,25 +2,18 @@ import os
 import base64
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-
+from typing import Dict, Any
 from openai import OpenAI
 
-# ----------------------------------------------------------------------
-# API Key Handling
-# ----------------------------------------------------------------------
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY not set. Check your terminal environment variables.")
+# Import your config
+try:
+    from meme_config import meme_template_db
+except ImportError:
+    # Fallback for testing if config is missing
+    meme_template_db = {"drake_meme": {}} 
 
-client = OpenAI(api_key=api_key)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Import the template database from your config file
-from meme_config import meme_template_db # Changed from meme_template_db to match your config file name usually
-
-# ----------------------------------------------------------------------
-# Helper: encode image to base64
-# ----------------------------------------------------------------------
 def encode_image(image_path: str) -> str:
     path = Path(image_path).expanduser().resolve()
     if not path.is_file():
@@ -28,46 +21,64 @@ def encode_image(image_path: str) -> str:
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
-# ----------------------------------------------------------------------
-# Core function: generate roast
-# ----------------------------------------------------------------------
 def generate_meme_roast(
     image_path: str,
-    detail: str = "low",
+    roast_level: str = "medium",
     max_tokens: int = 3000
 ) -> Dict[str, Any]:
     
-    # Encode the image
+    # 1. Get available memes dynamically from your config
+    available_memes = list(meme_template_db.keys())
+    memes_list_str = ", ".join(available_memes)
+
+    # 2. Encode Image
     try:
         base64_image = encode_image(image_path)
     except FileNotFoundError as e:
         return {"error": str(e)}
 
-    print(f"🧠 Sending to GPT-5 Mini (detail={detail})...")
+    print(f"🧠 AI Analyzing vibe... (Level: {roast_level} | Memes: {len(available_memes)})")
 
-    # Simplified System Prompt to reduce errors
+    # 3. Define the CS Persona
+    # This dictionary controls the "heat" of the roast
+    instructions = {
+        "mild": "You are a helpful TA. Tease them gently about simple errors (syntax, missing semicolons).",
+        "medium": "You are a tired Senior Dev. Be sarcastic about their code quality, spaghetti logic, and bad git habits.",
+        "savage": "You are a ruthless StackOverflow moderator. Destroy their ego. Mock their existence. Focus on unemployment, AI replacing them, and their bad 'vibe'."
+    }
+    persona = instructions.get(roast_level.lower(), instructions["medium"])
+
     system_prompt = (
-        "You are a Savage Roast Master. "
-        "Your task is to analyze the user's selfie and generate a 'Drake Hotline Bling' meme.\n"
-        "1. Identify the 'vibe' (e.g., tired, messy room, trying too hard).\n"
-        "2. Output strictly valid JSON with two keys:\n"
-        "   - 'top_text': What they should reject (The 'Nah' face).\n"
-        "   - 'bot_text': What they actually do (The 'Yeah' face).\n"
-        "3. Keep text under 10 words. Be mean but funny."
+        f"{persona}\n"
+        "TASK: Analyze the user's selfie and generate a roast meme.\n"
+        "THEME: Computer Science, Coding, CS Majors, CS Unemployment, Hackathons, Tech Life.\n\n"
+        f"AVAILABLE TEMPLATES: [{memes_list_str}]\n"
+        "1. Select the BEST template from the list that fits the user's vibe.\n"
+        "   - 'drake_meme': Good for Rejection/Acceptance.\n"
+        "   - 'panda_suit': Good for 'Trashy Reality' vs 'Professional Lie'.\n"
+        "   - 'dicaprio_laugh': Good for condescending mockery.\n"
+        "2. OUTPUT strict JSON:\n"
+        "   {\n"
+        "     'template': 'one_of_the_keys_above',\n"
+        "     'top_text': 'Text for the top box',\n"
+        "     'bot_text': 'Text for the bottom box'\n"
+        "   }\n"
+        "Constraint: Keep text under 12 words."
     )
 
+    # 4. Call GPT-5-Mini
     try:
         response = client.chat.completions.create(
-            model="gpt-5-mini", # <--- FIXED: Use the real model ID
+            model="gpt-5-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {
                     "role": "user", 
                     "content": [
-                        {"type": "text", "text": "Roast this image. JSON format only."},
+                        {"type": "text", "text": f"Roast this CS major. Level: {roast_level}."},
                         {
                             "type": "image_url", 
-                            "image_url": {"url": f"data:image/jpeg;base64,{base64_image}", "detail": detail}
+                            "image_url": {"url": f"data:image/jpeg;base64,{base64_image}", "detail": "low"}
                         }
                     ]
                 }
@@ -75,60 +86,20 @@ def generate_meme_roast(
             response_format={"type": "json_object"},
             max_completion_tokens=max_tokens,
         )
-    except Exception as e:
-        return {"error": f"API call failed: {str(e)}"}
-
-    # --- DEBUGGING SAFETY REFUSALS ---
-    choice = response.choices[0]
-    
-    # 1. Check if the model refused (Safety Filter)
-    if getattr(choice, 'refusal', None):
-        print(f"❌ SAFETY REFUSAL: {choice.refusal}")
-        return {"error": "AI refused to roast this image (Safety Filter)."}
-
-    # 2. Check if content is empty (Finish Reason)
-    content = choice.message.content
-    if not content:
-        print(f"❌ EMPTY CONTENT. Finish reason: {choice.finish_reason}")
-        return {"error": f"AI returned nothing. Reason: {choice.finish_reason}"}
-
-    # 3. Parse JSON
-    try:
+        
+        content = response.choices[0].message.content
         result = json.loads(content)
+        
+        # Verify the AI chose a valid template
+        if result.get("template") not in meme_template_db:
+            print(f"⚠️ AI chose invalid template '{result.get('template')}'. Defaulting to drake_meme.")
+            result["template"] = "drake_meme"
+            
         return result
-    except json.JSONDecodeError:
-        print("❌ JSON PARSE ERROR. Raw output:")
-        print(content)
-        return {"error": "Invalid JSON"}
 
-# ----------------------------------------------------------------------
-# Drake Wrapper
-# ----------------------------------------------------------------------
-def get_drake_roast(image_path: str) -> Dict[str, str]:
-    """
-    Returns dictionary with 'top_text' and 'bot_text'
-    """
-    result = generate_meme_roast(image_path)
+    except Exception as e:
+        return {"error": f"Brain Freeze: {str(e)}"}
 
-    if "error" in result:
-        print(f"⚠️  {result['error']}")
-        return {"top_text": "AI Failed", "bot_text": "To Roast You"}
-
-    # Return standard keys
-    return {
-        "top_text": result.get("top_text", "Error"),
-        "bot_text": result.get("bot_text", "Error")
-    }
-
-# ----------------------------------------------------------------------
-# Test Block
-# ----------------------------------------------------------------------
-if __name__ == "__main__":
-    test_path = input("📸 Drag and drop a photo to test: ").strip().replace("'", "").replace('"', "")
-    if os.path.exists(test_path):
-        roast = get_drake_roast(test_path)
-        print("\n✅ RESULT:")
-        print(f"Top: {roast['top_text']}")
-        print(f"Bot: {roast['bot_text']}")
-    else:
-        print("File not found.")
+# Wrapper for backward compatibility
+def get_roast(image_path, roast_level="medium"):
+    return generate_meme_roast(image_path, roast_level)
