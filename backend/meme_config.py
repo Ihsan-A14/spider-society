@@ -25,15 +25,6 @@ meme_template_db = {
         "text_4": {"pos": (23, 809), "box_size": (538, 215), "color": "black", "font_size": 40, "align": "center"}
     },
 
-    "ballon_scared": {
-        "filename": "components/ballon_scared.png",
-        "text_1": {"pos": (523, 1278), "box_size": (585, 217), "color": "black", "font_size": 40, "align": "center"},
-        "text_2": {"pos": (388, 1340), "box_size": (552, 233), "color": "black", "font_size": 40, "align": "center"},
-        "text_3": {"pos": (25, 1159), "box_size": (518, 217), "color": "black", "font_size": 40, "align": "center"},
-        "text_4": {"pos": (289, 1163), "box_size": (538, 215), "color": "black", "font_size": 40, "align": "center"},
-        "text_5": {"pos": (82, 579), "box_size": (500, 200), "color": "black", "font_size": 40, "align": "center"}
-    },
-
     "brain_explode": {
         "filename": "components/brain_explode.png",
         "text_1": {"pos": (20, 20), "box_size": (350, 275), "color": "black", "font_size": 40, "align": "center"},
