@@ -38,97 +38,104 @@
       </header>
 
       <section class="stage">
-        <section class="card">
-          <section class="card stageCard">
-            <div class="stageGrid">
-              <!-- LEFT: upload + settings -->
-              <div class="panel">
-                <div class="panelHead">
-                  <div class="panelTitle">Upload</div>
-                  <div class="panelSub">PNG/JPG • we’ll crop it nicely</div>
-                </div>
+        
+        <section class="card stageCard">
+          <div class="stageGrid">
+            <!-- LEFT: upload + settings -->
+            <div class="panel">
+              <div class="panelHead">
+                <div class="panelTitle">Upload</div>
+                <div class="panelSub">PNG/JPG • Under 5MB (recommended)</div>
+              </div>
 
-                <label class="drop" id="drop">
-                  <input id="file" type="file" accept="image/png,image/jpeg" />
-                  <div class="dropInner">
-                    <div class="title">Drop an image</div>
-                    <div class="hint">or click to browse</div>
+              <div class="drop" id="drop" role="button" tabindex="0" aria-label="Upload image">
+                <input id="file" type="file" accept="image/png,image/jpeg" />
+                <div class="dropInner">
+                  <div class="dropIcon">
+                    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M12 16V4"></path>
+                      <path d="M7 9l5-5 5 5"></path>
+                      <rect x="4" y="16" width="16" height="4" rx="2"></rect>
+                    </svg>
+                  </div>
+
+                  <div class="title">Bring a photo. Leave with a meme.</div>
+                  <div class="hint">or click to browse (no data stored • only dignity destroyed)</div>
+                  <div class="metaRow">
+                    <span class="fileName" id="fileName">No file selected</span>
                     <button type="button" class="secondary" id="pickBtn">Choose image</button>
                   </div>
-                </label>
-
-                <div class="controls controlsOneCol">
-                  <div class="control">
-                    <label for="intensity">Roast level</label>
-                    <select id="intensity">
-                      <option value="mild">Mild (friendly)</option>
-                      <option value="medium" selected>Medium (spicy)</option>
-                      <option value="savage">Savage (no mercy)</option>
-                    </select>
-                  </div>
-
-                  <div class="control">
-                    <label for="topic">Roast topic</label>
-                    <select id="topic">
-                      <option value="random" selected>Random</option>
-                      <option value="leetcode">LeetCode</option>
-                      <option value="pointers">Pointers / C</option>
-                      <option value="git">Git &amp; Dev</option>
-                      <option value="ai">AI / ML</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="actions actionsSpread">
-                  <button id="generate" class="primary" disabled>Generate roast meme</button>
-                  <button id="reset" class="ghost" disabled>Clear</button>
-                </div>
-
-                <div class="status" id="status" aria-live="polite"></div>
-                <div class="roulette" id="roulette" style="display:none;">
-                  <div class="chip" id="chip">🎲 picking template…</div>
                 </div>
               </div>
 
-              <!-- RIGHT: preview + output -->
-              <div class="panel">
-                <div class="panelHead">
-                  <div class="panelTitle">Result</div>
-                  <div class="panelSub">Preview → Meme → Download</div>
+
+
+              <div class="controls controlsOneCol">
+                <div class="control">
+                  <label for="intensity">Roast level</label>
+                  <select id="intensity">
+                    <option value="mild">Mild (friendly)</option>
+                    <option value="medium" selected>Medium (spicy)</option>
+                    <option value="savage">Savage (no mercy)</option>
+                  </select>
                 </div>
 
-                <div class="twoUp">
-                  <div class="box">
-                    <div class="boxLabel">Your photo</div>
-                    <img id="preview" alt="Uploaded image preview" />
-                    <div class="empty" id="previewEmpty">Upload an image to see it here.</div>
-                  </div>
+                <div class="control">
+                  <br>
+                  
+                </div>
+              </div>
 
-                  <div class="box">
-                    <div class="boxTop">
-                      <div class="boxLabel">Roasted meme</div>
-                      <a id="download" class="download" download="meme.png" style="display:none;">Download</a>
-                    </div>
-                    <img id="result" alt="Generated meme result" />
-                    <div class="empty" id="resultEmpty">Generate a meme and it’ll appear here.</div>
+              <div class="actions actionsSpread">
+                <button id="generate" class="primary" disabled>Generate roast meme</button>
+                <button id="reset" class="ghost" disabled>Clear</button>
+              </div>
+
+              <div class="status" id="status" aria-live="polite"></div>
+              <div class="roulette" id="roulette" style="display:none;">
+                <div class="chip" id="chip">🎲 picking template…</div>
+              </div>
+            </div>
+
+            <!-- RIGHT: preview + output -->
+            <div class="panel">
+              <div class="panelHead">
+                <div class="panelTitle">Result</div>
+                <div class="panelSub">Preview → Meme → Download</div>
+              </div>
+
+              <div class="twoUp">
+                <div class="box">
+                  <div class="boxLabel">Your photo</div>
+                  <img id="preview" alt="Uploaded image preview" />
+                  <div class="empty" id="previewEmpty">Upload an image to see it here.</div>
+                </div>
+
+                <div class="box">
+                  <div class="boxTop">
+                    <div class="boxLabel">Roasted meme</div>
+                    <a id="download" class="download" download="meme.png" style="display:none;">Download</a>
                   </div>
+                  <img id="result" alt="Generated meme result" />
+                  <div class="empty" id="resultEmpty">Generate a meme and it’ll appear here.</div>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
         </section>
+        
 
       </section>
 
       <section class="features">
         <div class="featureCard reveal">
-          <div class="featureCaps textImageSmall">WAYS OF USING</div>
-          <div class="featureScript">for leetcode • pointers • git • ML</div>
+          <div class="featureCaps textImageSmall">Because your friends were too nice to roast you.</div>
+          <div class="featureScript"></div>
         </div>
 
         <div class="featureCard reveal">
-          <div class="featureCaps">BUILT FOR HACKATHONS</div>
-          <div class="featureScript">fast, funny, shareable</div>
+          <div class="featureCaps2">fast, funny, shareable</div>
+          <div class="featureScript">just one click away</div>
         </div>
       </section>
       

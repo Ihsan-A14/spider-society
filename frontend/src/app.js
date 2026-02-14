@@ -29,3 +29,5 @@ function onScroll() {
 
 window.addEventListener("scroll", onScroll, { passive: true });
 onScroll();
+
+document.querySelectorAll(".panel")[1]?.classList.add("loaded");
