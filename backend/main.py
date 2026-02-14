@@ -1,5 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form, BackgroundTasks
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, UploadFile, File, Form, Response
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
@@ -11,7 +10,6 @@ from meme_builder import build_meme
 
 app = FastAPI()
 
-# --- CORS ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,70 +17,60 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Ensure temp folders exist
 os.makedirs("temp_uploads", exist_ok=True)
 os.makedirs("generated_memes", exist_ok=True)
 
-def cleanup_files(file_paths):
-    """
-    Background task to remove temporary files after the response is sent.
-    """
-    for path in file_paths:
-        if os.path.exists(path):
-            try:
-                os.remove(path)
-                print(f"🧹 Cleaned up: {path}")
-            except Exception as e:
-                print(f"⚠️ Failed to delete {path}: {e}")
-
 @app.post("/roast")
 async def generate_roast_endpoint(
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...), 
     roast_level: str = Form("medium")
 ):
-    # 1. Generate Unique ID for this request
+    # 1. Setup Paths
     request_id = str(uuid.uuid4())
-    input_filename = f"temp_{request_id}.png"
-    temp_input_path = os.path.join("temp_uploads", input_filename)
+    temp_input_path = os.path.join("temp_uploads", f"temp_{request_id}.png")
     
-    # 2. Save the uploaded file
+    # 2. Save Input File
     with open(temp_input_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    print(f"🔥 Request {request_id}: {roast_level} roast")
+    print(f"🔥 Processing Request: {request_id}")
 
-    # 3. Call Brain
-    roast_data = get_roast(temp_input_path, roast_level=roast_level)
-    
-    if "error" in roast_data:
-        # Clean up input immediately if we fail here
+    try:
+        # 3. Run AI Brain
+        roast_data = get_roast(temp_input_path, roast_level=roast_level)
+        
+        if "error" in roast_data:
+            return Response(content=f"Error: {roast_data['error']}", status_code=500)
+
+        # 4. Build Meme
+        generated_path = build_meme(roast_data)
+        
+        if not generated_path or not os.path.exists(generated_path):
+            return Response(content="Error: Meme generation failed", status_code=500)
+
+        # ---------------------------------------------------------
+        # THE FIX: Read file into RAM, then delete, then send
+        # ---------------------------------------------------------
+        
+        # Read bytes into memory
+        with open(generated_path, "rb") as f:
+            image_bytes = f.read()
+            
+        # Delete files from disk NOW (safe because we have the data in 'image_bytes')
         if os.path.exists(temp_input_path):
             os.remove(temp_input_path)
-        return {"error": roast_data['error']}
+        if os.path.exists(generated_path):
+            os.remove(generated_path)
+            
+        print(f"✅ Served & Deleted: {generated_path}")
 
-    # 4. Call Builder
-    # (Note: You might need to update meme_builder.py to accept a unique output name 
-    # if you want to support multiple users at once. For now, we rename it manually.)
-    generated_file = build_meme(roast_data)
-    
-    if not generated_file:
-        return {"error": "Builder failed to create image"}
+        # Return the bytes directly
+        return Response(content=image_bytes, media_type="image/png")
 
-    # Rename the output to avoid overwriting (optional but good practice)
-    final_output_path = os.path.join("generated_memes", f"meme_{request_id}.png")
-    
-    # Move the 'final_meme.png' to our safe folder
-    if os.path.exists(generated_file):
-        shutil.move(generated_file, final_output_path)
-    
-    # 5. Schedule Cleanup
-    # This runs AFTER the return statement sends the file to the user
-    background_tasks.add_task(cleanup_files, [temp_input_path, final_output_path])
-    
-    # 6. Return the Image
-    return FileResponse(final_output_path, media_type="image/png")
+    except Exception as e:
+        print(f"❌ Server Error: {e}")
+        return Response(content=str(e), status_code=500)
 
 @app.get("/")
 def health_check():
-    return {"status": "Roast API is running", "location": "Edmonton"}
+    return {"status": "Ready to Roast"}
