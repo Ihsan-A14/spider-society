@@ -15,15 +15,20 @@ except ImportError:
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def encode_image(image_path: str) -> str:
+    """Encodes a local image to base64 for the API."""
     path = Path(image_path).expanduser().resolve()
     if not path.is_file():
         raise FileNotFoundError(f"Image not found: {path}")
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
 
-def generate_meme_roast(image_path: str, roast_level: str = "medium", max_tokens: int = 3000) -> Dict[str, Any]:
+def generate_meme_roast(
+    image_path: str,
+    roast_level: str = "medium",
+    max_tokens: int = 3000
+) -> Dict[str, Any]:
     
-    # 1. Setup available memes
+    # 1. Get available memes
     available_memes = list(TEMPLATE_DB.keys())
     memes_list_str = ", ".join(available_memes)
 
@@ -33,33 +38,60 @@ def generate_meme_roast(image_path: str, roast_level: str = "medium", max_tokens
     except FileNotFoundError as e:
         return {"error": str(e)}
 
-    print(f"🧠 AI Analyzing vibe... (Level: {roast_level})")
+    print(f"🧠 DevRoast Analyzing... (Level: {roast_level})")
 
-    # 3. Define Persona
-    instructions = {
-        "mild": "You are a playful TA. Tease them about simple syntax errors.",
-        "medium": "You are a tired Senior Dev. Be sarcastic about their spaghetti code.",
-        "savage": "You are a toxic Tech Lead. Destroy their ego. Mock their unemployment."
-    }
-    persona = instructions.get(roast_level.lower(), instructions["medium"])
-
-    # 4. THE CORE DIRECTIVE (Your Requested Prompt)
+    # 3. THE DEVROAST SYSTEM PROMPT
     system_prompt = (
-        f"{persona}\n\n"
-        "Turn this image into a brutally savage meme roasting a CS student.\n"
-        "Theme: jobless, homeless, unemployed coder, broke student energy.\n"
-        "Use dark humor, tech jokes, and brutal sarcasm.\n"
-        "Keep captions short, lethal, and viral.\n\n"
-        f"AVAILABLE TEMPLATES: [{memes_list_str}]\n"
-        "RULES FOR JSON OUTPUT:\n"
-        "1. 'drake_meme' / 'panda_suit': Return JSON with keys 'top_text' and 'bot_text'.\n"
-        "2. 'dicaprio_laugh': Return JSON with 'top_text' (setup) and 'bot_text' (punchline).\n"
-        "3. 'clown_makeup': Return JSON with 'text_1', 'text_2', 'text_3', 'text_4'.\n"
-        "   - Step 1: Normal thought (e.g. 'I will apply to FAANG')\n"
-        "   - Step 2: Optimistic mistake (e.g. 'I will learn Rust in a weekend')\n"
-        "   - Step 3: Delusion (e.g. 'Who needs a degree?')\n"
-        "   - Step 4: Full Clown (e.g. 'Unpaid internship at 30')\n\n"
-        "JSON ONLY. NO EXPLANATION."
+        "You are 'DevRoast,' a cynical, hilarious, and culturally aware meme generator for Computer Science students.\n"
+        "Your goal: Generate a 'savage' meme based on the user's photo.\n\n"
+        
+        "--- ANALYSIS GUIDELINES ---\n"
+        "1. CLOTHING: Suit (Desperate), Hoodie (Grinder), Smart Casual (Fake Intern).\n"
+        "2. EXPRESSION: Smile (Ignorant), Sad (Segfault), Confused (Vim).\n"
+        "3. TONE: Savage but lighthearted CS jokes.\n\n"
+
+        "--- MEME LOGIC ENGINE (CRITICAL) ---\n"
+        "You MUST follow the specific format for the chosen template:\n\n"
+        
+        "1. **brain_explode** (4 panels): PROGRESSION of Intelligence/Stupidity.\n"
+        "   - text_1: The normal/correct way (e.g. 'Using Python loops')\n"
+        "   - text_2: The complex way (e.g. 'Using List Comprehensions')\n"
+        "   - text_3: The bad way (e.g. 'Recursion with no exit condition')\n"
+        "   - text_4: The ABSURD way (e.g. 'Hardcoding 1000 print statements')\n\n"
+        
+        "2. **clown_makeup** (4 panels): PROGRESSION of Delusion.\n"
+        "   - text_1: Normal thought (e.g. 'I'll finish this side project')\n"
+        "   - text_2: Optimistic mistake (e.g. 'I don't need Git, I'll be careful')\n"
+        "   - text_3: Delusion (e.g. 'I can write my own database')\n"
+        "   - text_4: Full Clown (e.g. 'Lost all data, no backups')\n\n"
+        
+        "3. **ballon_scared** (5 texts): The CHASE.\n"
+        "   - text_5: The Monster/Threat (e.g. 'The Senior Dev', 'Segfault')\n"
+        "   - text_1, text_2, text_3, text_4: The Victim running away (e.g. 'Me', 'My Code', 'My Career', 'My Sanity')\n\n"
+        
+        "4. **drake_meme** / **panda_suit** (2 panels): REJECTION vs ACCEPTANCE.\n"
+        "   - top_text: The 'Good' practice that you reject (e.g. 'Writing Unit Tests')\n"
+        "   - bot_text: The 'Bad' habit you actually do (e.g. 'Testing in Production')\n\n"
+
+        "5. **dicaprio_laugh** (2 texts): MOCKERY.\n"
+        "   - top_text: The Setup (e.g. 'He thinks HTML is a programming language')\n"
+        "   - bot_text: The Punchline (e.g. 'Wait until he sees CSS')\n\n"
+
+        "--- OUTPUT FORMAT (STRICT JSON) ---\n"
+        f"Choose the BEST template from: [{memes_list_str}].\n"
+        "Output strictly valid JSON:\n"
+        "{\n"
+        "  'visual_roast': 'Savage comment on their look',\n"
+        "  'template': 'template_key',\n"
+        "  'text_1': '...',\n"
+        "  'text_2': '...',\n"
+        "  'text_3': '...',\n"
+        "  'text_4': '...',\n"
+        "  'text_5': '...',\n"
+        "  'top_text': '...',\n"
+        "  'bot_text': '...'\n"
+        "}\n"
+        "Use ONLY the keys relevant to the chosen template."
     )
 
     try:
@@ -70,7 +102,7 @@ def generate_meme_roast(image_path: str, roast_level: str = "medium", max_tokens
                 {
                     "role": "user", 
                     "content": [
-                        {"type": "text", "text": f"Roast this person. Level: {roast_level}."},
+                        {"type": "text", "text": "Analyze this dev. JSON only."},
                         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                     ]
                 }
@@ -82,15 +114,52 @@ def generate_meme_roast(image_path: str, roast_level: str = "medium", max_tokens
         content = response.choices[0].message.content
         result = json.loads(content)
         
-        # Validation: If AI picks a fake template, force a random real one
+        # --- DATA SANITIZATION ---
+        result["user_image_path"] = image_path
+        
+        if "visual_roast" in result:
+            print(f"🔥 VISUAL ROAST: {result['visual_roast']}")
+
         if result.get("template") not in TEMPLATE_DB:
-            result["template"] = random.choice(available_memes)
-            
+            print(f"⚠️ Invalid template '{result.get('template')}'. Defaulting to drake_meme.")
+            result["template"] = "drake_meme"
+
+        template = result["template"]
+        
+        # FIX MISSING KEYS / FORMATTING
+        if template == "brain_explode":
+            if "text_1" not in result:
+                result["text_1"] = "Writing Code"
+                result["text_2"] = "StackOverflow"
+                result["text_3"] = "ChatGPT"
+                result["text_4"] = "Random Guessing"
+
+        elif template == "clown_makeup":
+             if "text_1" not in result:
+                # Map standard top/bot if AI failed
+                result["text_1"] = result.get("top_text", "Using a Library")
+                result["text_2"] = result.get("bot_text", "Writing it yourself")
+                result["text_3"] = "Writing it in Assembly"
+                result["text_4"] = "Coding on a whiteboard"
+        
+        elif template == "ballon_scared":
+             if "text_5" not in result:
+                result["text_1"] = "Me"
+                result["text_2"] = "Code"
+                result["text_3"] = "Bugs"
+                result["text_4"] = "Deadline"
+                result["text_5"] = "The P1 Ticket"
+
+        else: # Standard 2-panel memes
+            if "top_text" not in result:
+                result["top_text"] = result.get("text_1", "404 Text Not Found")
+                result["bot_text"] = result.get("text_2", "Try again")
+
         return result
 
     except Exception as e:
+        print(f"❌ BRAIN ERROR: {str(e)}")
         return {"error": f"Brain Freeze: {str(e)}"}
 
-# Wrapper
 def get_roast(image_path, roast_level="medium"):
     return generate_meme_roast(image_path, roast_level)
