@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 #'''
-image_path = 'components/woman_cat.png'
+image_path = 'components/girl_distress.png'
 
 def onclick(event):
     if event.xdata is not None and event.ydata is not None:
