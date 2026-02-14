@@ -302,6 +302,7 @@ body::after{
   border: 1px solid rgba(0,0,0,.10);
   border-radius: 18px;
   padding: 14px;
+  box-sizing: border-box;
 }
 
 .panel.loaded{
@@ -382,11 +383,15 @@ body::after{
   border: 1px solid rgba(0,0,0,.08);
 }
 
-#preview,#result {
+#preview {
   width: 100%;
-  height: 100%;
+  height: 92%;
   object-fit: contain;  /* ⭐️ this is the key */
   display: block;
+}
+
+#result {
+  display: none;
 }
 
 
@@ -498,7 +503,7 @@ select{
 
 /* Result boxes: feel more like “frames” */
 .box{
-  min-height: 260px;
+  min-height: 360px;
   background: rgba(255,255,255,.72);
   border: 1px dashed rgba(0,0,0,.14);
 }

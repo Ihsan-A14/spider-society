@@ -1,15 +1,21 @@
+// =====================================================
+// UI EFFECTS (your existing stuff)
+// =====================================================
+
 // --- SCROLL REVEALS ---
 const revealEls = document.querySelectorAll(".reveal");
-const io = new IntersectionObserver((entries) => {
-  for (const e of entries) {
-    if (e.isIntersecting) {
-      e.target.classList.add("in");
-      io.unobserve(e.target);
+const io = new IntersectionObserver(
+  (entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        e.target.classList.add("in");
+        io.unobserve(e.target);
+      }
     }
-  }
-}, { threshold: 0.12 });
-
-revealEls.forEach(el => io.observe(el));
+  },
+  { threshold: 0.12 }
+);
+revealEls.forEach((el) => io.observe(el));
 
 // --- PARALLAX (simple, smooth) ---
 const hero = document.querySelector(".hero");
@@ -23,7 +29,6 @@ function onScroll() {
     el.style.transform = `translateY(${y * speed}px)`;
   });
 
-  // tiny tilt on hero as you scroll (editorial feel)
   if (hero) hero.style.transform = `translateY(${y * 0.03}px)`;
 }
 
@@ -33,11 +38,12 @@ onScroll();
 document.querySelectorAll(".panel")[1]?.classList.add("loaded");
 
 // =====================================================
-// ✅ MEME GENERATION WIRING (Frontend -> FastAPI -> Image)
+// MEME GENERATION (Frontend -> FastAPI -> Image)
 // =====================================================
 
 const API_BASE = "http://127.0.0.1:8000";
 
+// Elements
 const drop = document.getElementById("drop");
 const fileInput = document.getElementById("file");
 const pickBtn = document.getElementById("pickBtn");
@@ -56,69 +62,71 @@ const downloadA = document.getElementById("download");
 
 const intensitySel = document.getElementById("intensity");
 
-// helper UI
+// Helpers
 function setStatus(msg) {
   if (statusEl) statusEl.textContent = msg || "";
 }
 
 function setPreview(file) {
   const url = URL.createObjectURL(file);
+
   previewImg.src = url;
   previewImg.style.display = "block";
-  previewImg.style.visibility = "visible";
-  previewImg.style.opacity = "1";
-  previewImg.style.position = "relative";
-  previewImg.style.zIndex = "2";
 
+  // hide empty overlay
   previewEmpty.style.display = "none";
-  previewEmpty.style.visibility = "hidden";
-  previewEmpty.style.opacity = "0";
-  previewEmpty.style.zIndex = "0";
+}
 
-  previewEmpty.style.display = "none";
+function clearPreview() {
+  previewImg.style.display = "none";
+  previewImg.removeAttribute("src");
+  previewEmpty.style.display = "block";
 }
 
 function setResultFromBlob(blob) {
   const url = URL.createObjectURL(blob);
+
   resultImg.src = url;
-  resultEmpty.style.display = "none";
+  resultImg.style.display = "block";      // show ONLY on success
+  resultEmpty.style.display = "none";     // remove placeholder
 
   downloadA.href = url;
   downloadA.style.display = "inline";
 }
 
-function resetUI() {
-  fileInput.value = "";
-  fileNameEl.textContent = "No file selected";
-
-  // preview
-  previewImg.style.display = "none";
-  previewImg.removeAttribute("src");
-  previewEmpty.style.display = "block";
-  previewEmpty.style.visibility = "visible";
-  previewEmpty.style.opacity = "1";
-
-  // result
+function clearResult() {
+  resultImg.style.display = "none";       // hide so no broken icon
   resultImg.removeAttribute("src");
+
+  // show placeholder text
   resultEmpty.style.display = "block";
 
-  // download
   downloadA.style.display = "none";
   downloadA.removeAttribute("href");
+}
 
-  generateBtn.disabled = true;
-  resetBtn.disabled = true;
+function resetUI() {
+  if (fileInput) fileInput.value = "";
+  if (fileNameEl) fileNameEl.textContent = "No file selected";
+
+  clearPreview();
+  clearResult();
+
+  if (generateBtn) generateBtn.disabled = true;
+  if (resetBtn) resetBtn.disabled = true;
 
   setStatus("");
+}
 
-
-
-  // --- ONE set of listeners for opening file picker ---
+// =====================================================
+// ONE clean set of "open file picker" listeners
+// (prevents the "upload twice" issue)
+// =====================================================
 
 pickBtn?.addEventListener("click", (e) => {
   e.preventDefault();
   e.stopPropagation();
-  fileInput.click();
+  fileInput?.click();
 });
 
 fileInput?.addEventListener("click", (e) => {
@@ -128,20 +136,13 @@ fileInput?.addEventListener("click", (e) => {
 drop?.addEventListener("click", (e) => {
   // Only trigger if user clicked the drop area itself (not button/input)
   if (e.target.closest("button") || e.target === fileInput) return;
-  fileInput.click();
+  fileInput?.click();
 });
 
-  previewImg.style.display = "none";
-  previewImg.removeAttribute("src");
+// =====================================================
+// File selected -> show preview, enable buttons
+// =====================================================
 
-  previewEmpty.style.display = "block";
-  previewEmpty.style.visibility = "visible";
-  previewEmpty.style.opacity = "1";
-
-}
-
-
-// When user selects a file
 fileInput?.addEventListener("change", () => {
   if (!fileInput.files?.length) return;
 
@@ -156,11 +157,21 @@ fileInput?.addEventListener("change", () => {
   setStatus("Ready to roast.");
 });
 
-// Reset button
-resetBtn?.addEventListener("click", resetUI);
+// Reset
+resetBtn?.addEventListener("click", (e) => {
+  e.preventDefault();
+  resetUI();
+});
 
-// Generate meme
-generateBtn?.addEventListener("click", async () => {
+// =====================================================
+// Generate Meme
+// - Keep placeholder visible initially
+// - Show image ONLY after successful response
+// =====================================================
+
+generateBtn?.addEventListener("click", async (e) => {
+  e.preventDefault();
+
   if (!fileInput.files?.length) {
     alert("Upload an image first!");
     return;
@@ -169,19 +180,24 @@ generateBtn?.addEventListener("click", async () => {
   const file = fileInput.files[0];
   const intensity = intensitySel?.value || "medium";
 
+  // user clicked generate: hide previous result image (no broken icon)
+  clearResult();
+  // optional: hide placeholder while generating (comment out if you want it to stay)
+  // resultEmpty.style.display = "none";
+
   generateBtn.disabled = true;
   setStatus("Cooking your meme... 🔥");
 
   const form = new FormData();
   form.append("image", file);
-  form.append("intensity", intensity); // only works if your backend accepts it
-  form.append("top_text", "CS student debugging"); // temp text
-  form.append("bot_text", "Adds print() everywhere"); // temp text
+  form.append("intensity", intensity);     // only if backend accepts it
+  form.append("top_text", "CS student debugging");
+  form.append("bot_text", "Adds print() everywhere");
 
   try {
     const res = await fetch(`${API_BASE}/meme`, {
       method: "POST",
-      body: form
+      body: form,
     });
 
     if (!res.ok) {
@@ -190,11 +206,19 @@ generateBtn?.addEventListener("click", async () => {
     }
 
     const blob = await res.blob();
-    setResultFromBlob(blob);
 
+    // Safety: ensure it's actually an image
+    if (!blob.type.startsWith("image/")) {
+      throw new Error(`Expected image/* but got ${blob.type || "unknown"}`);
+    }
+
+    setResultFromBlob(blob);
     setStatus("Done ✅");
   } catch (err) {
     console.error(err);
+
+    // show placeholder again, keep image hidden (no broken icon)
+    clearResult();
     setStatus("Failed 💀 Check backend terminal + CORS.");
   } finally {
     generateBtn.disabled = false;
