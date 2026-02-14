@@ -1,0 +1,211 @@
+:root{
+  --paper:#f6f1e6;
+  --ink:#121212;
+  --muted:#2b2b2b;
+  --mango:#f6b21a;
+  --mango2:#ffcc4d;
+  --char:#101114;
+  --card:#ffffffcc;
+  --shadow: 0 16px 45px rgba(0,0,0,.14);
+  --radius: 22px;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background: radial-gradient(1000px 600px at 70% 10%, rgba(246,178,26,.22), transparent 58%),
+              radial-gradient(900px 600px at 15% 35%, rgba(0,0,0,.06), transparent 60%),
+              var(--paper);
+  color: var(--ink);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  overflow-x:hidden;
+}
+
+/* paper grain */
+body::before{
+  content:"";
+  position:fixed; inset:0;
+  pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+  opacity:.12;
+  mix-blend-mode:multiply;
+}
+
+.wrap{max-width:1100px; margin:0 auto; padding:26px 18px 60px; position:relative}
+
+/* hero with wavy cut bottom */
+.hero{
+  position:relative;
+  padding: 18px 0 26px;
+  margin-bottom: 18px;
+}
+.hero::after{
+  content:"";
+  position:absolute;
+  left:-40px; right:-40px; bottom:-14px;
+  height:48px;
+  background: linear-gradient(90deg, var(--mango), var(--mango2));
+  clip-path: polygon(0 55%, 10% 70%, 20% 52%, 32% 68%, 45% 54%, 58% 72%, 70% 56%, 82% 70%, 92% 52%, 100% 65%, 100% 100%, 0 100%);
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,.15));
+  border-radius: 0 0 28px 28px;
+}
+
+.heroTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom: 16px;
+}
+.brand{
+  font-weight:900;
+  letter-spacing:.18em;
+  font-size:12px;
+}
+.pill{
+  font-size:12px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid rgba(0,0,0,.08);
+  box-shadow: 0 10px 25px rgba(0,0,0,.06);
+}
+
+.heroTitle{
+  margin:0;
+  line-height:.92;
+}
+.titleCaps{
+  display:block;
+  font-family: "Bebas Neue", system-ui;
+  font-size: clamp(44px, 7vw, 76px);
+  letter-spacing: .02em;
+}
+.heroScript{
+  font-family:"Permanent Marker", system-ui;
+  font-size: clamp(18px, 2.1vw, 26px);
+  margin-top: 8px;
+  color: #1d1d1d;
+  transform: rotate(-1deg);
+}
+
+/* IMAGE-FILL TEXT (like your inspo) */
+.textImage{
+  background-image: url("./assets/food-texture.jpg"); /* add any image here */
+  background-size: cover;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+}
+.textImageSmall{
+  background-image: url("./assets/gradient-texture.jpg"); /* another texture */
+  background-size: cover;
+  background-position: center;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color: transparent;
+}
+
+/* main stage card: more collage-like */
+.stage .card,
+.card{
+  background: var(--card);
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+
+/* add a “sticker” corner to the card */
+.card{
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:"";
+  position:absolute;
+  top:-70px; right:-70px;
+  width:160px; height:160px;
+  background: radial-gradient(circle at 30% 30%, rgba(246,178,26,.9), rgba(246,178,26,.15));
+  transform: rotate(14deg);
+  border-radius: 28px;
+  filter: blur(.2px);
+}
+
+/* features section */
+.features{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+  margin-top: 18px;
+}
+@media (max-width:900px){
+  .features{ grid-template-columns: 1fr; }
+}
+
+.featureCard{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.10);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 30px rgba(0,0,0,.09);
+  padding:16px;
+  position:relative;
+  overflow:hidden;
+}
+.featureCard::after{
+  content:"";
+  position:absolute; left:-20px; right:-20px; bottom:-10px;
+  height:24px;
+  background: linear-gradient(90deg, rgba(246,178,26,.9), rgba(255,204,77,.9));
+  clip-path: polygon(0 55%, 12% 80%, 25% 52%, 38% 76%, 52% 54%, 66% 78%, 78% 56%, 90% 76%, 100% 60%, 100% 100%, 0 100%);
+  opacity:.85;
+}
+.featureCaps{
+  font-family:"Bebas Neue";
+  font-size: 44px;
+  letter-spacing:.02em;
+  line-height:.9;
+}
+.featureScript{
+  font-family:"Permanent Marker";
+  font-size: 18px;
+  margin-top: 10px;
+  transform: rotate(-1deg);
+}
+
+/* keep your original grid */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1.2fr;
+  gap:18px;
+}
+@media (max-width:900px){ .grid{grid-template-columns:1fr} }
+
+/* scroll reveal base */
+.reveal{
+  opacity:0;
+  transform: translateY(18px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.reveal.in{
+  opacity:1;
+  transform: translateY(0);
+}
+
+/* small parallax “paper pieces” */
+.parallaxPiece{
+  position:absolute;
+  width:220px; height:80px;
+  border-radius: 18px;
+  background: rgba(0,0,0,.06);
+  z-index:-1;
+  filter: blur(.2px);
+}
+
+/* optional: tone down your emoji particles so they match paper style */
+.particle{
+  opacity:.22;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.18));
+}

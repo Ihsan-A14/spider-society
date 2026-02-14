@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Permanent+Marker&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CS Roast Meme Generator</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="particles" aria-hidden="true"></div>
+    <main class="wrap">
+      
+      <!-- ⭐️ ADD PARALLAX PIECES HERE -->
+      <div class="parallaxPiece" data-parallax="0.08"
+          style="top:120px; left:-20px;"></div>
+
+      <div class="parallaxPiece" data-parallax="0.12"
+          style="top:420px; right:-40px; width:260px;"></div>
+
+      <!-- your hero -->
+      <header class="hero">
+        <div class="heroTop">
+          <div class="brand">CS ROAST LAB</div>
+          <div class="pill">random templates • instant roast</div>
+        </div>
+
+        <h1 class="heroTitle reveal">
+          <span class="titleCaps textImage">A NEW LOOK</span>
+          <span class="titleCaps">AT A FAMILIAR</span>
+          <span class="titleCaps">CS STUDENT</span>
+        </h1>
+
+        <div class="heroScript reveal">“upload. generate. get cooked.”</div>
+      </header>
+
+      <section class="stage">
+        <section class="card">
+          <div class="grid">
+            <div class="left">
+              <label class="drop" id="drop">
+                <input id="file" type="file" accept="image/png,image/jpeg" />
+                <div class="dropInner">
+                  <div class="title">Drop an image here</div>
+                  <div class="hint">PNG/JPG • Max ~5MB recommended</div>
+                  <button type="button" class="secondary" id="pickBtn">Choose file</button>
+                </div>
+              </label>
+
+              <div class="controls">
+                <div class="control">
+                  <label for="intensity">Roast intensity</label>
+                  <select id="intensity">
+                    <option value="mild">Mild</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="savage">Savage</option>
+                  </select>
+                </div>
+
+                <div class="control">
+                  <label for="topic">CS topic</label>
+                  <select id="topic">
+                    <option value="random" selected>Random</option>
+                    <option value="leetcode">LeetCode</option>
+                    <option value="pointers">Pointers / C</option>
+                    <option value="ai">AI / ML</option>
+                    <option value="git">Git / Dev</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button id="generate" class="primary" disabled>Generate meme</button>
+                <button id="reset" class="ghost" disabled>Reset</button>
+              </div>
+
+              <div class="status" id="status" aria-live="polite"></div>
+            </div>
+
+            <div class="right">
+              <div class="previewBox">
+                <div class="previewLabel">Preview</div>
+                <img id="preview" alt="Your uploaded image preview" />
+                <div class="previewEmpty" id="previewEmpty">
+                  No image yet. Upload one to preview it here.
+                </div>
+              </div>
+
+              <div class="resultBox">
+                <div class="resultTop">
+                  <div class="resultLabel">Generated meme</div>
+                  <a id="download" class="download" download="meme.png" style="display:none;">
+                    Download
+                  </a>
+                </div>
+                <img id="result" alt="Generated meme result" />
+                <div class="resultEmpty" id="resultEmpty">
+                  Your meme will appear here after generation.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </section>
+
+      <section class="features">
+        <div class="featureCard reveal">
+          <div class="featureCaps textImageSmall">WAYS OF USING</div>
+          <div class="featureScript">for leetcode • pointers • git • ML</div>
+        </div>
+
+        <div class="featureCard reveal">
+          <div class="featureCaps">BUILT FOR HACKATHONS</div>
+          <div class="featureScript">fast, funny, shareable</div>
+        </div>
+      </section>
+      
+
+      <footer class="footer">
+        <span>Tip:</span> If your backend runs somewhere else, change <code>API_BASE</code> in <code>app.js</code>.
+      </footer>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
